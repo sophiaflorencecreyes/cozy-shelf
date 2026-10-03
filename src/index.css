@@ -1,24 +1,15 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #f6ecd9;
+  --color-paper-dark: #ead9b9;
+  --color-ink: #3a2a1c;
+  --color-brown: #6b4423;
+  --color-brown-dark: #5a381c;
+  --color-gold: #c58b3a;
+  --color-muted: #7a6650;
 }
 
 html {
   scroll-behavior: smooth;
-}
-
-body {
-  display: block;
-  min-width: 0;
-  background: #f6ecd9;
-}
-
-#root {
-  width: 100%;
-  max-width: none;
-  margin: 0;
-  padding: 0;
-  border: none;
-  text-align: left;
 }

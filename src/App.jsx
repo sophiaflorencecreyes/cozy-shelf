@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import './App.css'
 
 const books = [
   { id: 1, title: 'Pride and Prejudice', author: 'Jane Austen', published: 1813, genres: ['Romance', 'Classic'], rating: 5, color: '#b45f6b', cover: '/covers/pride-and-prejudice.jpg', desc: 'Manners, misjudgments, and a very slow-burn love story.' },
@@ -16,11 +15,11 @@ const genres = ['All', 'Fantasy', 'Sci-Fi', 'Romance', 'Horror', 'Classic', 'Adv
 
 function Navbar({ savedCount }) {
   return (
-    <nav className="navbar">
-      <h2 className="logo">Cozy Shelf</h2>
-      <ul className="nav-links">
-        <li><a href="#shelf">Books</a></li>
-        <li><a href="#list">Reading List ({savedCount})</a></li>
+    <nav className="sticky top-0 z-10 flex w-full flex-col items-center justify-between gap-2 bg-brown px-[5vw] py-4 text-paper shadow-md sm:flex-row">
+      <h2 className="text-2xl font-bold">Cozy Shelf</h2>
+      <ul className="flex list-none gap-6">
+        <li><a href="#shelf" className="font-bold hover:text-gold">Books</a></li>
+        <li><a href="#list" className="font-bold hover:text-gold">Reading List ({savedCount})</a></li>
       </ul>
     </nav>
   )
@@ -28,11 +27,11 @@ function Navbar({ savedCount }) {
 
 function Hero({ search, onSearch }) {
   return (
-    <header className="hero">
-      <h1>Find your next favorite book!</h1>
-      <p>Browse, search, and save stories for any time of day</p>
+    <header className="w-full bg-linear-to-b from-brown-dark to-brown px-5 py-24 text-center text-paper">
+      <h1 className="mb-4 text-4xl font-bold leading-tight md:text-5xl">Find your next favorite book!</h1>
+      <p className="mb-8 text-xl italic">Browse, search, and save stories for any time of day</p>
       <input
-        className="search"
+        className="w-11/12 max-w-lg rounded-full border-[3px] border-gold bg-paper px-6 py-3.5 text-base text-ink outline-none"
         type="text"
         placeholder="Search by title or author..."
         value={search}
@@ -44,11 +43,13 @@ function Hero({ search, onSearch }) {
 
 function Filters({ active, onSelect }) {
   return (
-    <div className="filters">
+    <div className="mb-10 flex flex-wrap justify-center gap-2.5">
       {genres.map((g) => (
         <button
           key={g}
-          className={g === active ? 'filter active' : 'filter'}
+          className={`cursor-pointer rounded-full border-2 border-brown px-5 py-2 font-bold transition ${
+            g === active ? 'bg-brown text-paper' : 'bg-transparent text-brown hover:bg-paper-dark'
+          }`}
           onClick={() => onSelect(g)}
         >
           {g}
@@ -62,28 +63,35 @@ function BookCard({ book, isSaved, onToggle }) {
   const stars = '★'.repeat(book.rating) + '☆'.repeat(5 - book.rating)
 
   return (
-    <article className="book">
-      <div className="cover" style={{ background: book.color }}>
-        <span className="cover-title">{book.title}</span>
-        <span className="cover-author">{book.author}</span>
+    <article className="overflow-hidden rounded-l-md rounded-r-2xl border-l-8 border-black/35 bg-[#fffaf0] text-left shadow-xl transition-transform duration-200 hover:-translate-y-2 hover:-rotate-1">
+      <div
+        className="flex min-h-[90px] flex-col justify-between gap-2 p-4 text-white"
+        style={{ background: book.color }}
+      >
+        <span className="text-xl font-bold leading-tight">{book.title}</span>
+        <span className="text-sm italic opacity-90">{book.author}</span>
       </div>
       <img
-        className="cover-img"
+        className="block h-[220px] w-full object-contain p-3"
         src={book.cover}
         alt={`Cover of ${book.title}`}
         onError={(e) => (e.target.style.display = 'none')}
       />
-      <div className="book-info">
-        <p className="published">Published: {book.published}</p>
-        <div className="tags">
+      <div className="p-4">
+        <p className="mb-2.5 text-sm italic text-muted">Published: {book.published}</p>
+        <div className="flex flex-wrap gap-1.5">
           {book.genres.map((g) => (
-            <span key={g} className="genre-tag">{g}</span>
+            <span key={g} className="inline-block rounded-full bg-paper-dark px-3 py-0.5 text-xs font-bold text-brown">
+              {g}
+            </span>
           ))}
         </div>
-        <p className="stars">{stars}</p>
-        <p className="desc">{book.desc}</p>
+        <p className="my-2 text-lg text-gold">{stars}</p>
+        <p className="mb-3.5 text-[0.92rem] leading-normal text-muted">{book.desc}</p>
         <button
-          className={isSaved ? 'save-btn saved' : 'save-btn'}
+          className={`w-full cursor-pointer rounded-lg border-2 border-brown p-2.5 font-bold transition ${
+            isSaved ? 'bg-brown text-paper' : 'bg-transparent text-brown hover:bg-paper-dark'
+          }`}
           onClick={() => onToggle(book.id)}
         >
           {isSaved ? '✓ Saved' : '+ Save to list'}
@@ -95,11 +103,11 @@ function BookCard({ book, isSaved, onToggle }) {
 
 function Shelf({ books, saved, onToggle }) {
   if (books.length === 0) {
-    return <p className="empty">No books found. Try another search 🔍</p>
+    return <p className="italic text-muted">No books found. Try another search 🔍</p>
   }
 
   return (
-    <div className="grid">
+    <div className="grid w-full grid-cols-[repeat(auto-fill,minmax(230px,1fr))] gap-8">
       {books.map((b) => (
         <BookCard
           key={b.id}
@@ -114,15 +122,15 @@ function Shelf({ books, saved, onToggle }) {
 
 function ReadingList({ savedBooks }) {
   return (
-    <section id="list" className="section list-section">
-      <h2>My Reading List</h2>
+    <section id="list" className="w-full bg-paper-dark px-[5vw] py-16 text-center">
+      <h2 className="mb-6 text-4xl font-bold text-brown">My Reading List</h2>
       {savedBooks.length === 0 ? (
-        <p className="empty">Nothing here yet. Save a book above!</p>
+        <p className="italic text-muted">Nothing here yet. Save a book above!</p>
       ) : (
-        <ul className="list">
+        <ul className="mx-auto max-w-xl list-none text-left">
           {savedBooks.map((b) => (
-            <li key={b.id}>
-              <span className="dot" style={{ background: b.color }}></span>
+            <li key={b.id} className="flex items-center gap-3 border-b border-dashed border-muted py-3">
+              <span className="h-3.5 w-3.5 shrink-0 rounded-full" style={{ background: b.color }}></span>
               <strong>{b.title}</strong> <em>by {b.author}</em>
             </li>
           ))}
@@ -154,16 +162,16 @@ function App() {
   const savedBooks = books.filter((b) => saved.includes(b.id))
 
   return (
-    <div className="app">
+    <div className="min-h-screen w-full bg-paper font-serif text-ink">
       <Navbar savedCount={saved.length} />
       <Hero search={search} onSearch={setSearch} />
-      <section id="shelf" className="section">
-        <h2>The Shelf</h2>
+      <section id="shelf" className="w-full px-[5vw] py-16 text-center">
+        <h2 className="mb-6 text-4xl font-bold text-brown">The Shelf</h2>
         <Filters active={genre} onSelect={setGenre} />
         <Shelf books={visibleBooks} saved={saved} onToggle={toggleSave} />
       </section>
       <ReadingList savedBooks={savedBooks} />
-      <footer className="footer">
+      <footer className="w-full bg-brown px-5 py-8 text-center italic text-paper">
         "Books are a uniquely portable magic" - Stephen King
       </footer>
     </div>
