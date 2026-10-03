@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { Link, NavLink, Route, Routes } from 'react-router'
+import About from './pages/About.jsx'
 
 const books = [
   { id: 1, title: 'Pride and Prejudice', author: 'Jane Austen', published: 1813, genres: ['Romance', 'Classic'], rating: 5, color: '#b45f6b', cover: '/covers/pride-and-prejudice.jpg', desc: 'Manners, misjudgments, and a very slow-burn love story.' },
@@ -14,12 +16,18 @@ const books = [
 const genres = ['All', 'Fantasy', 'Sci-Fi', 'Romance', 'Horror', 'Classic', 'Adventure', 'Fiction', 'Mystery', 'Dark Academia']
 
 function Navbar({ savedCount }) {
+  const linkClass = ({ isActive }) =>
+    `font-bold hover:text-gold ${isActive ? 'text-gold underline underline-offset-4' : ''}`
+
   return (
     <nav className="sticky top-0 z-10 flex w-full flex-col items-center justify-between gap-2 bg-brown px-[5vw] py-4 text-paper shadow-md sm:flex-row">
-      <h2 className="text-2xl font-bold">Cozy Shelf</h2>
+      <h2 className="text-2xl font-bold">
+        <Link to="/">Cozy Shelf</Link>
+      </h2>
       <ul className="flex list-none gap-6">
-        <li><a href="#shelf" className="font-bold hover:text-gold">Books</a></li>
-        <li><a href="#list" className="font-bold hover:text-gold">Reading List ({savedCount})</a></li>
+        <li><NavLink to="/" end className={linkClass}>Books</NavLink></li>
+        <li><a href="/#list" className="font-bold hover:text-gold">Reading List ({savedCount})</a></li>
+        <li><NavLink to="/about" className={linkClass}>About</NavLink></li>
       </ul>
     </nav>
   )
@@ -176,22 +184,10 @@ function ReadingList({ savedBooks, onRemove, onClear }) {
   )
 }
 
-function App() {
+function Home({ saved, setSaved }) {
   const [genre, setGenre] = useState('All')
   const [search, setSearch] = useState('')
   const [sort, setSort] = useState('default')
-  const [saved, setSaved] = useState(() => {
-    try {
-      const stored = localStorage.getItem('cozy-shelf-saved')
-      return stored ? JSON.parse(stored) : []
-    } catch {
-      return []
-    }
-  })
-
-  useEffect(() => {
-    localStorage.setItem('cozy-shelf-saved', JSON.stringify(saved))
-  }, [saved])
 
   const toggleSave = (id) => {
     setSaved(
@@ -218,8 +214,7 @@ function App() {
   const savedBooks = books.filter((b) => saved.includes(b.id))
 
   return (
-    <div className="min-h-screen w-full bg-paper font-serif text-ink">
-      <Navbar savedCount={saved.length} />
+    <>
       <Hero search={search} onSearch={setSearch} />
       <section id="shelf" className="w-full px-[5vw] py-16 text-center">
         <h2 className="mb-6 text-4xl font-bold text-brown">The Shelf</h2>
@@ -232,6 +227,31 @@ function App() {
         onRemove={(id) => setSaved(saved.filter((s) => s !== id))}
         onClear={() => setSaved([])}
       />
+    </>
+  )
+}
+
+function App() {
+  const [saved, setSaved] = useState(() => {
+    try {
+      const stored = localStorage.getItem('cozy-shelf-saved')
+      return stored ? JSON.parse(stored) : []
+    } catch {
+      return []
+    }
+  })
+
+  useEffect(() => {
+    localStorage.setItem('cozy-shelf-saved', JSON.stringify(saved))
+  }, [saved])
+
+  return (
+    <div className="min-h-screen w-full bg-paper font-serif text-ink">
+      <Navbar savedCount={saved.length} />
+      <Routes>
+        <Route path="/" element={<Home saved={saved} setSaved={setSaved} />} />
+        <Route path="/about" element={<About />} />
+      </Routes>
       <footer className="w-full bg-brown px-5 py-8 text-center italic text-paper">
         "Books are a uniquely portable magic" - Stephen King
       </footer>
