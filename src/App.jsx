@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const books = [
   { id: 1, title: 'Pride and Prejudice', author: 'Jane Austen', published: 1813, genres: ['Romance', 'Classic'], rating: 5, color: '#b45f6b', cover: '/covers/pride-and-prejudice.jpg', desc: 'Manners, misjudgments, and a very slow-burn love story.' },
@@ -55,6 +55,26 @@ function Filters({ active, onSelect }) {
           {g}
         </button>
       ))}
+    </div>
+  )
+}
+
+function SortSelect({ sort, onSort }) {
+  return (
+    <div className="mb-8 flex items-center justify-center gap-3">
+      <label htmlFor="sort" className="font-bold text-brown">Sort by:</label>
+      <select
+        id="sort"
+        value={sort}
+        onChange={(e) => onSort(e.target.value)}
+        className="rounded-full border-2 border-brown bg-paper px-4 py-2 font-bold text-brown outline-none"
+      >
+        <option value="default">Default</option>
+        <option value="title">Title (A-Z)</option>
+        <option value="newest">Newest first</option>
+        <option value="oldest">Oldest first</option>
+        <option value="rating">Highest rated</option>
+      </select>
     </div>
   )
 }
@@ -120,21 +140,37 @@ function Shelf({ books, saved, onToggle }) {
   )
 }
 
-function ReadingList({ savedBooks }) {
+function ReadingList({ savedBooks, onRemove, onClear }) {
   return (
     <section id="list" className="w-full bg-paper-dark px-[5vw] py-16 text-center">
       <h2 className="mb-6 text-4xl font-bold text-brown">My Reading List</h2>
       {savedBooks.length === 0 ? (
         <p className="italic text-muted">Nothing here yet. Save a book above!</p>
       ) : (
-        <ul className="mx-auto max-w-xl list-none text-left">
-          {savedBooks.map((b) => (
-            <li key={b.id} className="flex items-center gap-3 border-b border-dashed border-muted py-3">
-              <span className="h-3.5 w-3.5 shrink-0 rounded-full" style={{ background: b.color }}></span>
-              <strong>{b.title}</strong> <em>by {b.author}</em>
-            </li>
-          ))}
-        </ul>
+        <>
+          <ul className="mx-auto max-w-xl list-none text-left">
+            {savedBooks.map((b) => (
+              <li key={b.id} className="flex items-center gap-3 border-b border-dashed border-muted py-3">
+                <span className="h-3.5 w-3.5 shrink-0 rounded-full" style={{ background: b.color }}></span>
+                <span className="flex-1">
+                  <strong>{b.title}</strong> <em>by {b.author}</em>
+                </span>
+                <button
+                  onClick={() => onRemove(b.id)}
+                  className="cursor-pointer rounded-full border-2 border-brown px-3 py-0.5 text-sm font-bold text-brown hover:bg-brown hover:text-paper"
+                >
+                  Remove
+                </button>
+              </li>
+            ))}
+          </ul>
+          <button
+            onClick={onClear}
+            className="mt-6 cursor-pointer rounded-full bg-brown px-6 py-2 font-bold text-paper hover:bg-brown-dark"
+          >
+            Clear list
+          </button>
+        </>
       )}
     </section>
   )
@@ -143,7 +179,19 @@ function ReadingList({ savedBooks }) {
 function App() {
   const [genre, setGenre] = useState('All')
   const [search, setSearch] = useState('')
-  const [saved, setSaved] = useState([])
+  const [sort, setSort] = useState('default')
+  const [saved, setSaved] = useState(() => {
+    try {
+      const stored = localStorage.getItem('cozy-shelf-saved')
+      return stored ? JSON.parse(stored) : []
+    } catch {
+      return []
+    }
+  })
+
+  useEffect(() => {
+    localStorage.setItem('cozy-shelf-saved', JSON.stringify(saved))
+  }, [saved])
 
   const toggleSave = (id) => {
     setSaved(
@@ -151,12 +199,20 @@ function App() {
     )
   }
 
-  const visibleBooks = books.filter((b) => {
+  const filteredBooks = books.filter((b) => {
     const matchGenre = genre === 'All' || b.genres.includes(genre)
     const matchSearch = (b.title + ' ' + b.author)
       .toLowerCase()
       .includes(search.toLowerCase())
     return matchGenre && matchSearch
+  })
+
+  const visibleBooks = [...filteredBooks].sort((a, b) => {
+    if (sort === 'title') return a.title.localeCompare(b.title)
+    if (sort === 'newest') return b.published - a.published
+    if (sort === 'oldest') return a.published - b.published
+    if (sort === 'rating') return b.rating - a.rating
+    return a.id - b.id
   })
 
   const savedBooks = books.filter((b) => saved.includes(b.id))
@@ -168,9 +224,14 @@ function App() {
       <section id="shelf" className="w-full px-[5vw] py-16 text-center">
         <h2 className="mb-6 text-4xl font-bold text-brown">The Shelf</h2>
         <Filters active={genre} onSelect={setGenre} />
+        <SortSelect sort={sort} onSort={setSort} />
         <Shelf books={visibleBooks} saved={saved} onToggle={toggleSave} />
       </section>
-      <ReadingList savedBooks={savedBooks} />
+      <ReadingList
+        savedBooks={savedBooks}
+        onRemove={(id) => setSaved(saved.filter((s) => s !== id))}
+        onClear={() => setSaved([])}
+      />
       <footer className="w-full bg-brown px-5 py-8 text-center italic text-paper">
         "Books are a uniquely portable magic" - Stephen King
       </footer>
