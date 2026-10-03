@@ -1,0 +1,6 @@
+search in browser:
+http://localhost:5173/
+
+input in prompt:
+cd my-app
+npm run dev
