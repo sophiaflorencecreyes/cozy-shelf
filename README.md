@@ -66,3 +66,32 @@ classDiagram
     Home "1" *-- "0..*" BookCard
     BookCard ..> Book : uses
 ```
+
+## Data model
+
+```mermaid
+erDiagram
+    BOOK ||--o{ BOOK_GENRE : has
+    GENRE ||--o{ BOOK_GENRE : tags
+    BOOK ||--o{ SAVED_BOOK : "saved as"
+    BOOK {
+        int id PK
+        string title
+        string author
+        int published
+        int rating
+        string color
+        string cover
+        string desc
+    }
+    GENRE {
+        string name PK
+    }
+    BOOK_GENRE {
+        int book_id PK, FK
+        string genre_name PK, FK
+    }
+    SAVED_BOOK {
+        int book_id PK, FK
+    }
+```
