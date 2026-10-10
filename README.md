@@ -1,16 +1,68 @@
 # React + Vite
+# Cozy Shelf
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A small book website built with React, Vite, Tailwind CSS, and React Router.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Search books by title or author
+- Filter by genre (a book can have several genres)
+- Sort by title, year, or rating
+- Save books to a reading list that is remembered after a refresh
+- About page
 
-## React Compiler
+## Class diagrams
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Component structure
 
-## Expanding the ESLint configuration
+```mermaid
+classDiagram
+    App *-- Navbar
+    App *-- Home
+    App *-- About
+    Home *-- Hero
+    Home *-- Filters
+    Home *-- SortSelect
+    Home *-- Shelf
+    Home *-- ReadingList
+    Shelf *-- BookCard
+    BookCard ..> Book : uses
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Class details
+
+```mermaid
+classDiagram
+    class App {
+        -Array~number~ saved
+        +setSaved(ids)
+        +saveToStorage()
+    }
+    class Home {
+        -string genre
+        -string search
+        -string sort
+        +toggleSave(id)
+        +getVisibleBooks() Array~Book~
+    }
+    class BookCard {
+        -Book book
+        -boolean isSaved
+        +onToggle(id)
+    }
+    class Book {
+        <<data object>>
+        -number id
+        -string title
+        -string author
+        -number published
+        -Array~string~ genres
+        -number rating
+        -string color
+        -string cover
+        -string desc
+    }
+    App "1" *-- "1" Home
+    Home "1" *-- "0..*" BookCard
+    BookCard ..> Book : uses
+```
